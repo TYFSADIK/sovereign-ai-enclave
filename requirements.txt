@@ -1,0 +1,2 @@
+cryptography>=42
+# real build: psycopg[binary], pgvector, sentence-transformers (offline model), python-keycloak, PyKCS11

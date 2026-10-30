@@ -1,0 +1,26 @@
+# Enclave lab stack. No container has a route to the internet (internal network only).
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev
+    environment: {KC_BOOTSTRAP_ADMIN_USERNAME: admin, KC_BOOTSTRAP_ADMIN_PASSWORD_FILE: /run/secrets/kc_admin}
+    secrets: [kc_admin]
+    networks: [enclave]
+  opa:
+    image: openpolicyagent/opa:1.0.0
+    command: run --server --addr :8181 /policy
+    volumes: ["../policy:/policy:ro"]
+    networks: [enclave]
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment: {POSTGRES_PASSWORD_FILE: /run/secrets/pg_pw}
+    secrets: [pg_pw]
+    networks: [enclave]
+  softhsm:
+    build: ./softhsm        # SoftHSM2 + pkcs11-proxy; replace with YubiHSM2 on hardware
+    networks: [enclave]
+networks:
+  enclave: {internal: true}
+secrets:
+  kc_admin: {file: ../secrets/kc_admin}
+  pg_pw: {file: ../secrets/pg_pw}
